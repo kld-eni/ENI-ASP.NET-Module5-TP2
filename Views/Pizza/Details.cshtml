@@ -1,0 +1,11 @@
+﻿@model Module5_TP2.Pizza
+
+<h2>Details</h2>
+
+<div>
+    @Html.Partial("_PizzaDetails", Model)
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id })
+    @Html.ActionLink("Back to List", "Index")
+</p>

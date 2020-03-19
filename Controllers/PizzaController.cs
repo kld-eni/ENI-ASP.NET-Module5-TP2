@@ -101,7 +101,7 @@ namespace Module5_TP2.Controllers
             {
                 return RedirectToAction("Index");
             }
-            return View();
+            return View(pizza);
         }
 
         // POST: Pizza/Delete/5

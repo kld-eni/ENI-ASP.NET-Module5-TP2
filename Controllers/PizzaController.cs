@@ -39,17 +39,29 @@ namespace Module5_TP2.Controllers
         {
             try
             {
-                Pizza newPizza = new Pizza {
-                    Nom = pizzaVM.Pizza.Nom,
-                    Ingredients = FakeDB.IngredientsDisponibles.Where(i => pizzaVM.SelectedIngredients.Contains(i.Id)).ToList(),
-                    Pate = FakeDB.PatesDisponibles.SingleOrDefault(p => p.Id == pizzaVM.SelectedPate)
-                };
-                Pizza addedPizza = FakeDB.AddPizza(newPizza);
-                return RedirectToAction("Index");
+                ModelState.Remove("Pizza.Id");
+                if (ModelState.IsValid)
+                {
+                    bool validatedPizza = ValidatePizza(ModelState, pizzaVM);
+                    if (!validatedPizza)
+                    {
+                        return View(pizzaVM);
+                    }
+
+                    Pizza newPizza = new Pizza
+                    {
+                        Nom = pizzaVM.Pizza.Nom,
+                        Ingredients = FakeDB.IngredientsDisponibles.Where(i => pizzaVM.SelectedIngredients.Contains(i.Id)).ToList(),
+                        Pate = FakeDB.PatesDisponibles.SingleOrDefault(p => p.Id == pizzaVM.SelectedPate)
+                    };
+                    Pizza addedPizza = FakeDB.AddPizza(newPizza);
+                    return RedirectToAction("Index");
+                }
+                return View(pizzaVM);
             }
             catch
             {
-                return View();
+                return View(pizzaVM);
             }
         }
 
@@ -75,21 +87,31 @@ namespace Module5_TP2.Controllers
         {
             try
             {
-                Pizza pizza = FakeDB.Pizzas.SingleOrDefault(p => p.Id == id);
-                if (pizza == null)
+                if (ModelState.IsValid)
                 {
+                    bool validatedPizza = ValidatePizza(ModelState, pizzaVM, id);
+                    if (!validatedPizza)
+                    {
+                        return View(pizzaVM);
+                    }
+
+                    Pizza pizza = FakeDB.Pizzas.SingleOrDefault(p => p.Id == id);
+                    if (pizza == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+
+                    pizza.Nom = pizzaVM.Pizza.Nom;
+                    pizza.Ingredients = FakeDB.IngredientsDisponibles.Where(i => pizzaVM.SelectedIngredients.Contains(i.Id)).ToList();
+                    pizza.Pate = FakeDB.PatesDisponibles.SingleOrDefault(p => p.Id == pizzaVM.SelectedPate);
+
                     return RedirectToAction("Index");
                 }
-
-                pizza.Nom = pizzaVM.Pizza.Nom;
-                pizza.Ingredients = FakeDB.IngredientsDisponibles.Where(i => pizzaVM.SelectedIngredients.Contains(i.Id)).ToList();
-                pizza.Pate = FakeDB.PatesDisponibles.SingleOrDefault(p => p.Id == pizzaVM.SelectedPate);
-
-                return RedirectToAction("Index");
+                return View(pizzaVM);
             }
             catch
             {
-                return View();
+                return View(pizzaVM);
             }
         }
 
@@ -122,6 +144,52 @@ namespace Module5_TP2.Controllers
             {
                 return View();
             }
+        }
+
+        private bool ValidatePizza(ModelStateDictionary ms, PizzaVM pizzaVM, int id = 0)
+        {
+            #region Fields validation
+            bool validatedName = pizzaVM.Pizza.Nom != null && pizzaVM.Pizza.Nom.Length >= 5 && pizzaVM.Pizza.Nom.Length <= 20;
+            if (!validatedName)
+            {
+                ms.AddModelError("", "Nom obligatoire et devant contenir entre 5 et 20 charactères");
+            }
+
+            bool validatedPate = pizzaVM.SelectedPate > 0;
+            if (!validatedPate)
+            {
+                ms.AddModelError("", "Pâte obligatoire");
+            }
+
+            bool validatedIngredients = pizzaVM.SelectedIngredients.Count >= 2 && pizzaVM.SelectedIngredients.Count <= 5;
+            if (!validatedIngredients)
+            {
+                ms.AddModelError("", "Une pizza doit avoir entre 2 et 5 ingrédients");
+            }
+
+            if (!validatedName || !validatedPate || !validatedIngredients)
+            {
+                return false;
+            }
+            #endregion
+
+            #region Server validation
+
+            bool alreadyExistingName = FakeDB.Pizzas.Any(p => p.Nom.ToUpper() == pizzaVM.Pizza.Nom.ToUpper() && (id != 0 ? p.Id != id : true));
+            if (alreadyExistingName)
+            {
+                ms.AddModelError("", "In existe déjà une pizza portant ce nom");
+            }
+
+            bool alreadyExistingComposition = FakeDB.Pizzas.Any(p => p.Ingredients.Count() == pizzaVM.SelectedIngredients.Count() && p.Ingredients.All(i => pizzaVM.SelectedIngredients.Contains(i.Id) && (id != 0 ? p.Id != id : true)));
+
+            if (alreadyExistingComposition)
+            {
+                ms.AddModelError("", "Une pizza comporte déjà cette liste d'ingrédients");
+            }
+
+            return !(alreadyExistingName || alreadyExistingComposition);
+            #endregion
         }
     }
 }

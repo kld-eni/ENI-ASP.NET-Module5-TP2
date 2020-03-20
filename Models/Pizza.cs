@@ -1,12 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Module5_TP2
 {
     public class Pizza
     {
         public int Id { get; set; }
+
+        [Required]
+        [Display(Name = "Nom")]
+        [StringLength(20, MinimumLength = 5)]
         public string Nom { get; set; }
+
+        [Display(Name = "Pâte")]
         public Pate Pate { get; set; }
+
+        [Display(Name = "Ingredients")]
         public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
 
         public static List<Ingredient> IngredientsDisponibles => new List<Ingredient>

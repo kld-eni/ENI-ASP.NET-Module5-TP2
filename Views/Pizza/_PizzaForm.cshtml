@@ -15,17 +15,17 @@
 </div>
 
 <div class="form-group">
-    @Html.LabelFor(model => model.Pizza.Pate, htmlAttributes: new { @class = "control-label col-md-2" })
+    @Html.LabelFor(model => model.SelectedPate, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
         @Html.DropDownListFor(model => model.SelectedPate, Model.PatesListItems, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.Pizza.Pate, "", new { @class = "text-danger" })
+        @Html.ValidationMessageFor(model => model.SelectedPate, "", new { @class = "text-danger" })
     </div>
 </div>
 
 <div class="form-group">
-    @Html.LabelFor(model => model.Pizza.Ingredients, htmlAttributes: new { @class = "control-label col-md-2" })
+    @Html.LabelFor(model => model.SelectedIngredients, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
         @Html.ListBoxFor(model => model.SelectedIngredients, Model.IngredientsListItems, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.Pizza.Ingredients, "", new { @class = "text-danger" })
+        @Html.ValidationMessageFor(model => model.SelectedIngredients, "", new { @class = "text-danger" })
     </div>
 </div>
